@@ -8,7 +8,6 @@ var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
 var pg = require('pg');
 var csurf = require('csurf');
-//var gravatar = require('gravatar');
 
 var LOCAL_DATABASE_URL = 'postgres:user:password@localhost:port/db';
 var conURL = process.env.DATABASE_URL || LOCAL_DATABASE_URL;
@@ -83,7 +82,6 @@ app.post('/posts/post', function(req, res, next) {
 		console.log(error);
 		res.redirect('/');
 	    });
-
 	});
     } else {
 	console.log('memo is empty.');
@@ -161,6 +159,38 @@ app.delete('/posts/:id', function(req, res, next) {
 	    res.redirect('/posts/show');
 	});
 	query.on('error', function(error) {
+	    console.log(error);
+	    res.redirect('/');
+	});
+    });
+});
+
+app.put('/posts/update/:id', function(req, res, next) {
+    var postid = req.params.id;
+    var memo = req.body["memo"];
+
+    pg.connect(conURL, function(err, client) {
+	if (err) throw err;
+
+	var query_ts = client.query("select to_char(current_timestamp, 'YYYY-MM-DD HH24:MI:SS.US');");
+	var timestamp = ''
+
+	query_ts.on('row', function(row) {
+	    timestamp = row.to_char;
+	});
+	query_ts.on('end', function(result) {
+	    var qstr = "update only core set ts = $1, memo = $2 where id = $3;";
+	    var query = client.query(qstr, [timestamp, memo, postid]);
+
+	    query.on('end', function(result) {
+		res.redirect('/posts/show');
+	    });
+	    query.on('error', function(error) {
+		console.log(error);
+		res.redirect('/');
+	    });
+	});
+	query_ts.on('error', function(error) {
 	    console.log(error);
 	    res.redirect('/');
 	});

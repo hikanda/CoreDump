@@ -57,18 +57,45 @@
 			  <b><%= data[i].name.trim() %></b>
 			  <%= data[i].ts %>
 			  <% if ( name === data[i].name.trim() ) { %>
-			  <form action="/posts/<%= data[i].id %>" method="POST" onSubmit="return disp()">
-			    <input type="hidden" name="_method" value="DELETE" />
-			    <input type="hidden" name="_csrf" value="<%= csrf %>" />
-			    <button type="submit" class="btn btn-default btn-xs pull-right">削除</button>
-			  </form>
-<!--
-			  <form action="/posts/<%= data[i].id %>" method="POST">
-			    <input type="hidden" name="_method" value="PUT" />
-			    <input type="hidden" name="_csrf" value="<%= csrf %>" />
-			    <button type="submit" class="btn btn-default btn-xs pull-right">更新</button>
-			  </form>
--->
+			  <div class="dropdown">
+			    <button class="btn btn-default dropdown-toggle btn-xs" type="button" data-toggle="dropdown">
+			      <span class="caret"></span>
+			    </button>
+			    <ul class="dropdown-menu right">
+			      <li>
+				<form action="/posts/<%= data[i].id %>" method="POST" onSubmit="return disp()">
+				  <input type="hidden" name="_method" value="DELETE" />
+				  <input type="hidden" name="_csrf" value="<%= csrf %>" />
+				  <button type="submit" class="btn btn-link btn-xs">削除</button>
+				</form>
+			      </li>
+			      <li>
+				<button type="button" class="btn btn-link btn-xs" data-toggle="modal" data-target="#myModal<%= data[i].id %>">更新</button>
+			      </li>
+			    </ul>
+			  </div>
+
+			  <div class="modal fade" id="myModal<%= data[i].id %>" tabindex="-1" role="dialog">
+			    <div class="modal-dialog" role="document">
+			      <div class="modal-content">
+				<div class="modal-header">
+				  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				  <h4 class="modal-title">投稿修正中</h4>
+				</div>
+				<div class="modal-body">
+				  <form action="/posts/update/<%= data[i].id %>" method="POST">
+				    <input type="hidden" name="_method" value="PUT" />
+				    <input type="hidden" name="_csrf" value="<%= csrf %>" />
+				    <textarea id="memo" class="form-control" type="text" maxlength="140" name="memo"><%= data[i].memo %></textarea>
+				    <p></p><p>
+				      <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+				      <button type="submit" class="btn btn-primary">更新する</button>
+				    </p>
+				  </form>
+				</div>
+			      </div>
+			    </div>
+			  </div>
 			  <% } %>
 			</h6>
 		    </div>
@@ -89,7 +116,6 @@
     <% } %>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="/js/bootstrap.min.js"></script>
     <script src="/js/bootstrap-maxlength.js"></script>
     <script>
