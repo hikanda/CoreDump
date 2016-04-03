@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="CoreDump">
+    <title>CoreDump</title>
+    <link href="/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+
+  <body style="padding-top: 75px; padding-bottom: 75px;">
+    <% if (!user) { %>
+    <div class="jumbotron text-center">
+      <h1>CoreDump</h1>
+      <p>思ってることを吐き出すところ</p>
+      <a href="/auth/twitter" class="btn btn-primary">Twitterでログイン</a>
+    </div>
+    <% } else { %>
+    <div class="row">
+      <nav class="navbar navbar-default navbar-fixed-top">
+	<div class="navbar-header">
+	  <a href="" class="navbar-brand">CoreDump</a>
+	</div>
+
+	<ul class="nav navbar-nav navbar-right">
+	  <li><img class="img-rounded" id="<%= id %>" src="<%= imgurl %>" width="40" height="40" /></li>
+	  <li><a href="/posts/show/<%= name %>"><%= name %></a></li>
+	  <li><a href="/logout">logout?</a><li>
+	</ul>
+      </nav>
+    </div>
+
+    <div class="form-group">
+      <form action="/posts/post" method="POST">
+	<input type="hidden" id="name" name="name" value="<%= name %>" />
+	<input type="hidden" name="_csrf" value="<%= csrf %>" />
+	<label for="description">今考えてることは？</label>
+	<textarea id="memo" class="form-control" type="text" maxlength="140" name="memo" style="width:400px;height:100px;"></textarea>
+	<button type="submit" class="btn btn-primary btn-sm">送信</button>
+      </form>
+    </div>
+    <form action="/posts/show" method="GET">
+      <button type="submit" class="btn btn-primary">最新を表示</button>
+    </form>
+    <% } %>
+    <% if (user) { %>
+    <% var show_num = 20; %>
+        <% for (var i = 0; i < data.length; i++ ) { %>
+	    <% if ( i != 0 && (i % show_num) === 0 ) { %>
+            <div class="contents">
+	    <% } %>
+	        <div class="panel panel-default" style="width:400px;">
+	            <div class="panel-heading">
+		        <h6>
+			  <b><%= data[i].name.trim() %></b>
+			  <%= data[i].ts %>
+			  <% if ( name === data[i].name.trim() ) { %>
+			  <form action="/posts/<%= data[i].id %>" method="POST" onSubmit="return disp()">
+			    <input type="hidden" name="_method" value="DELETE" />
+			    <input type="hidden" name="_csrf" value="<%= csrf %>" />
+			    <button type="submit" class="btn btn-default btn-xs pull-right">削除</button>
+			  </form>
+<!--
+			  <form action="/posts/<%= data[i].id %>" method="POST">
+			    <input type="hidden" name="_method" value="PUT" />
+			    <input type="hidden" name="_csrf" value="<%= csrf %>" />
+			    <button type="submit" class="btn btn-default btn-xs pull-right">更新</button>
+			  </form>
+-->
+			  <% } %>
+			</h6>
+		    </div>
+		    <div class="panel-body">
+		      <h4><%= data[i].memo %></h4>
+		    </div>
+		</div>
+	    <% if ( i > show_num &&
+	            (((i+1) % show_num) === 0 || (i+1) === data.length) ) { %>
+            </div> <!-- contents -->
+	    <% } %>
+	    <% if ( ((i+1) % show_num) === 0 && (i+1) != data.length ) { %>
+	    <div class="more">
+	        <button class="btn btn-primary">もっと表示する</button>
+	    </div>
+	    <% } %>
+        <% } %>
+    <% } %>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/bootstrap-maxlength.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#memo').maxlength({
+	        alwaysShow: true,
+                warningClass: "label label-success",
+                limitReachedClass: "label label-danger"
+	    });
+	});
+    </script>
+    <script>
+        function disp() {
+	    if(window.confirm('投稿を削除します。\nよろしいですか？')){
+	        return true;
+	    } else {
+	        window.alert('キャンセルしました。');
+	        return false;
+	    }
+	}
+    </script>
+    <script>
+	$(function(){
+		//一番上の要素以外を非表示
+		$('.contents:not(.contents:first-of-type)').css('display','none');
+		//ボタンを非表示
+		$('.more').nextAll('.more').css('display','none');
+		$('.more').on('click', function() {
+			//押したボタンを非表示
+			$(this).css('display','none');
+			$(this).next('.contents').slideDown('fast');
+			//次のボタンを表示
+			$(this).nextAll('.more:first').css('display','block');
+		});
+	});
+    </script>
+  </body>
+</html>
